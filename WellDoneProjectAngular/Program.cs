@@ -2,25 +2,49 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
-using WellDoneProjectAngular.Data;
-using WellDoneProjectAngular.Models;
+using WellDoneProjectAngular.Core.Models;
+using WellDoneProjectAngular.Configurations;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using WellDoneProjectAngular.Infrastructure.Data;
+using WellDoneProjectAngular.Infrastructure;
+using WellDoneProjectAngular.Core.Interfaces;
+using WellDoneProjectAngular.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Logging.AddConsole();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddCookieSettings();
 
-builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+Infrastructure.ConfigureServices(builder.Configuration, builder.Services);
 
-builder.Services.AddAuthentication()
-    .AddIdentityServerJwt();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddDefaultUI()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+
+builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
+
+builder.Services.AddCoreServices(builder.Configuration);
+
+
+//builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+//builder.Services.AddIdentityServer()
+//    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+
+//builder.Services.AddAuthentication()
+//    .AddIdentityServerJwt();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
