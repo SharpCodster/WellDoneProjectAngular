@@ -47,6 +47,11 @@ builder.Services.AddCoreServices(builder.Configuration);
 //    .AddIdentityServerJwt();
 //
 
+
+
+builder.Services.AddIdentityServer()
+    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -77,5 +82,25 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.MapFallbackToFile("index.html"); ;
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    //var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+    try
+    {
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        AppDbContextSeeder.SeedAsync(userManager, roleManager).GetAwaiter().GetResult();
+    }
+    catch (Exception ex)
+    {
+        int i = 1;
+        //var logger = loggerFactory.CreateLogger<Program>();
+        //logger.LogError(ex, "An error occurred seeding the DB.");
+    }
+}
+
 
 app.Run();

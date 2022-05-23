@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WellDoneProjectAngular.Infr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WellDoneProjectAngular.Core", "WellDoneProjectAngular.Core\WellDoneProjectAngular.Core.csproj", "{D3FA8D1A-B5EE-4E48-B84F-074B265BACA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WellDoneProjectAngular.Seeder", "WellDoneProjectAngular.Seeder\WellDoneProjectAngular.Seeder.csproj", "{74AF2F0C-6449-4BFA-9661-16B5571E3C8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D3FA8D1A-B5EE-4E48-B84F-074B265BACA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3FA8D1A-B5EE-4E48-B84F-074B265BACA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3FA8D1A-B5EE-4E48-B84F-074B265BACA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74AF2F0C-6449-4BFA-9661-16B5571E3C8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74AF2F0C-6449-4BFA-9661-16B5571E3C8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74AF2F0C-6449-4BFA-9661-16B5571E3C8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74AF2F0C-6449-4BFA-9661-16B5571E3C8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
