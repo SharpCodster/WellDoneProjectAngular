@@ -36,7 +36,7 @@ builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 
 builder.Services.AddCoreServices(builder.Configuration);
 
-
+//
 //builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
 //    .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -45,6 +45,7 @@ builder.Services.AddCoreServices(builder.Configuration);
 
 //builder.Services.AddAuthentication()
 //    .AddIdentityServerJwt();
+//
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -67,7 +68,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-app.UseIdentityServer();
+//app.UseIdentityServer();
 app.UseAuthorization();
 
 app.MapControllerRoute(

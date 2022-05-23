@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using WellDoneProjectAngular.Core;
+using WellDoneProjectAngular.Core.Interfaces;
+using WellDoneProjectAngular.Core.Interfaces.Data;
+using WellDoneProjectAngular.Infrastructure.Repositories;
 
 namespace WellDoneProjectAngular.Configurations
 {
@@ -8,8 +10,10 @@ namespace WellDoneProjectAngular.Configurations
         public static IServiceCollection AddCoreServices(this IServiceCollection services,
         IConfiguration configuration)
         {
-            //services.AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
-            //services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+
+            services.AddTransient<IRequestContextProvider, RequestContextProvider>();
 
             //services.AddScoped<IBasketService, BasketService>();
             //services.AddScoped<IOrderService, OrderService>();

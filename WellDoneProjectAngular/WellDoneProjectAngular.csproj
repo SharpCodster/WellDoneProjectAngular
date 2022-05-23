@@ -31,7 +31,6 @@
   <ItemGroup>
     <ProjectReference Include="..\WellDoneProjectAngular.Core\WellDoneProjectAngular.Core.csproj" />
     <ProjectReference Include="..\WellDoneProjectAngular.Infrastructure\WellDoneProjectAngular.Infrastructure.csproj" />
-    <ProjectReference Include="..\WellDoneProjectAngular.Services\WellDoneProjectAngular.Services.csproj" />
   </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
