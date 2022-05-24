@@ -6,7 +6,7 @@ using WellDoneProjectAngular.Core.Models;
 
 namespace WellDoneProjectAngular.Infrastructure.Email
 {
-    internal class SmtpEmailSender : IEmailSender
+    public class SmtpEmailSender : IEmailSender
     {
         private readonly IOptions<EmailSettings> _optionsEmailSettings;
 

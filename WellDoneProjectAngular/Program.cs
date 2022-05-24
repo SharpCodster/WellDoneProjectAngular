@@ -9,6 +9,9 @@ using WellDoneProjectAngular.Infrastructure.Data;
 using WellDoneProjectAngular.Infrastructure;
 using WellDoneProjectAngular.Core.Interfaces;
 using WellDoneProjectAngular.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using WellDoneProjectAngular.Infrastructure.Email;
+using WellDoneProjectAngular.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,26 +34,19 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
-builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
-
-builder.Services.AddCoreServices(builder.Configuration);
-
-//
-//builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-//    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-//builder.Services.AddIdentityServer()
-//    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
-
-//builder.Services.AddAuthentication()
-//    .AddIdentityServerJwt();
-//
-
-
+builder.Services.AddAuthentication()
+    .AddIdentityServerJwt();
 
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+
+builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
+builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
+
+builder.Services.AddCoreServices(builder.Configuration);
+builder.Services.AddWebServices(builder.Configuration);
+
+ConfigureMapper.AddAutoMapper(builder.Services);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -73,16 +69,21 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-//app.UseIdentityServer();
+app.UseIdentityServer();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
-app.MapRazorPages();
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller}/{action=Index}/{id?}");
 
-app.MapFallbackToFile("index.html"); ;
+//app.MapRazorPages();
 
+//app.MapFallbackToFile("index.html"); ;
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 using (var scope = app.Services.CreateScope())
 {

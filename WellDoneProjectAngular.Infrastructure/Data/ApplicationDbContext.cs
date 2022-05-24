@@ -13,10 +13,19 @@ namespace WellDoneProjectAngular.Infrastructure.Data
     //update-database -Context ApplicationDbContext
     public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     {
+        public DbSet<CatalogItem> CatalogItems { get; set; }
+        public DbSet<CatalogBrand> CatalogBrands { get; set; }
+        public DbSet<CatalogType> CatalogTypes { get; set; }
+
+        //public DbSet<Basket> Baskets { get; set; }
+        //public DbSet<Order> Orders { get; set; }
+        //public DbSet<OrderItem> OrderItems { get; set; }
+        //public DbSet<BasketItem> BasketItems { get; set; }
+
+
         public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions)
             : base(options, operationalStoreOptions)
         { }
-
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
