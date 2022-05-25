@@ -2,9 +2,11 @@
 {
     public class AuthenticationDto
     {
-        public bool UserAuthenticated { get; set; }
-        public bool Required2FA { get; set; }
-        public bool LockedOut { get; set; }
-        public bool NotAllowed { get; set; }
+        public bool Succeeded { get; set; } = false;
+        public string Token { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public bool IsLockedOut { get; set; } = false;
+        public bool IsNotAllowed { get; set; } = false;
+        public bool RequiresTwoFactor { get; set; } = false;
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using WellDoneProjectAngular.Core.Costants;
 using WellDoneProjectAngular.Core.Dtos;
+using WellDoneProjectAngular.Core.Interfaces;
 using WellDoneProjectAngular.Core.Models;
 
 namespace WellDoneProjectAngular.Controllers
@@ -18,17 +19,20 @@ namespace WellDoneProjectAngular.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly ITokenClaimsService _tokenClaimsService;
         private readonly ILogger<AuthenticationController> _logger;
 
         public AuthenticationController(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
-            IEmailSender emailSender, 
+            IEmailSender emailSender,
+            ITokenClaimsService tokenClaimsService,
             ILogger<AuthenticationController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _emailSender = emailSender;
+            _tokenClaimsService = tokenClaimsService;
             _logger = logger;
         }
 
@@ -47,17 +51,19 @@ namespace WellDoneProjectAngular.Controllers
             if (IsValidLogin(model))
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, lockoutOnFailure: false);
-                
+
+                AuthenticationDto response = new AuthenticationDto()
+                {
+                    Succeeded = result.Succeeded,
+                    RequiresTwoFactor = result.RequiresTwoFactor,
+                    IsLockedOut = result.IsLockedOut,
+                    IsNotAllowed = result.IsNotAllowed,
+                    Username = model.Username
+                };
+
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation($"User {model.Username} logged in.");
-                    return Ok(new AuthenticationDto()
-                    {
-                        UserAuthenticated = true,
-                        Required2FA = false,
-                        LockedOut = false,
-                        NotAllowed = false
-                    });
+                    response.Token = await _tokenClaimsService.GetTokenAsync(model.Username);
                 }
 
                 if (result.RequiresTwoFactor)
@@ -68,50 +74,58 @@ namespace WellDoneProjectAngular.Controllers
                     var token = await _userManager.GenerateTwoFactorTokenAsync(user, AuthorizationConstants.TokeProvider);
 
                     await _emailSender.SendEmailAsync(user.Email, "Your Token", token);
-
-                    return Ok(new AuthenticationDto()
-                    {
-                        UserAuthenticated = true,
-                        Required2FA = true,
-                        LockedOut = false,
-                        NotAllowed = false
-                    });
                 }
 
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning($"User {model.Username} account locked out.");
-                    return Ok(new AuthenticationDto()
-                    {
-                        UserAuthenticated = true,
-                        Required2FA = false,
-                        LockedOut = true,
-                        NotAllowed = false
-                    });
-                }   
 
-                // Sara tipo se non è andata bene con gli altri?
-                if (result.IsNotAllowed)
-                {
-                    _logger.LogWarning($"User {model.Username} not allowed to log-in");
-                    return Ok(new AuthenticationDto()
-                    {
-                        UserAuthenticated = true,
-                        Required2FA = false,
-                        LockedOut = false,
-                        NotAllowed = true
-                    });
-                }
+                return Ok(response);
             }
 
             _logger.LogWarning($"User {model.Username} - invalid login attempt.");
-            return Unauthorized(new AuthenticationDto()
-            {
-                UserAuthenticated = false,
-                Required2FA = false,
-                LockedOut = false
-            });
+            return Unauthorized();
         }
+
+
+        [HttpPost]
+        [Route("2fa-login")]
+        public async Task<IActionResult> LoginWith2Fa([FromBody] LoginDto model)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            if (user == null)
+            {
+                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            }
+
+            if (String.IsNullOrEmpty(model.TwoFactorCode))
+            {
+                throw new InvalidOperationException($"Insert two-factor authentication code");
+            }
+
+            var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+            var result = await _signInManager.TwoFactorSignInAsync(AuthorizationConstants.TokeProvider, authenticatorCode, model.RememberMe, model.RememberMachine);
+
+            AuthenticationDto response = new AuthenticationDto()
+            {
+                Succeeded = result.Succeeded,
+                RequiresTwoFactor = result.RequiresTwoFactor,
+                IsLockedOut = result.IsLockedOut,
+                IsNotAllowed = result.IsNotAllowed,
+                Username = model.Username
+            };
+
+            if (result.Succeeded)
+            {
+                response.Token = await _tokenClaimsService.GetTokenAsync(model.Username);
+            }
+
+            return Ok(response);
+        }
+
+
+
+
+
 
 
         [HttpPost]
@@ -196,7 +210,7 @@ namespace WellDoneProjectAngular.Controllers
 
         private bool IsValidLogin(LoginDto model)
         {
-            return String.IsNullOrEmpty(model.Username) && String.IsNullOrEmpty(model.Password);
+            return String.IsNullOrEmpty(model.Username) || String.IsNullOrEmpty(model.Password);
         }
     }
 }
